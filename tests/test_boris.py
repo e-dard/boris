@@ -9,7 +9,6 @@ import boris
 from boris import BikeChecker
 
 
-
 class TestBoris(unittest.TestCase):
 
     def test_time_ms(self):
@@ -52,8 +51,10 @@ class TestBikeChecker(unittest.TestCase):
             """
         self.bc = BikeChecker(endpoint=StringIO(x))
 
-    def test_all_result(self):
-        """ Tests boris.BikeChecker.all parses correct result """
+    def test__process_stations(self):
+        """
+        Tests boris.BikeChecker._process_stations parses correct result
+        """
         expected = [dict([('id', 8), ('name', u"Lodge Road, St. John's Wood"), 
                           ('terminalName', u'003423'), ('lat', 51.5), 
                           ('long', -0.14), ('installed', True), 
@@ -62,7 +63,9 @@ class TestBikeChecker(unittest.TestCase):
                           ('removalDate', None), ('temporary', False), 
                           ('nbBikes', 3), ('nbEmptyDocks', 15), 
                           ('nbDocks', 18)])] 
-        self.assertEquals(expected, self.bc.all())
+        stations = boris._parse_feed(self.bc.endpoint)
+        self.bc._process_stations(stations)
+        self.assertEquals(expected, self.bc._stations_lst)
 
     @patch('boris.etree.parse', wraps=etree.parse)
     @patch('boris.datetime', wraps=datetime)
@@ -70,8 +73,8 @@ class TestBikeChecker(unittest.TestCase):
         """ Tests boris.BikeChecker.all respects the cache """
         now = dt_mock.datetime.utcnow
         now.return_value = datetime.datetime.utcfromtimestamp(0)
-        # attribute error because etree will never be set.
-        self.assertRaises(AttributeError, self.bc.all)
+        # no update because cache not exceeded
+        self.bc.all()
         self.assertFalse(etree_mock.called)
 
         # now we force an update

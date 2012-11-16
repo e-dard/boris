@@ -37,6 +37,10 @@ def _convert(element):
         value = TAG_TYPES.get(element.tag, unicode)(value)
     return (element.tag, value)
 
+def _parse_feed(endpoint):
+    """ Parses a web-feed and returns the root XML element """
+    return etree.parse(endpoint).getroot()
+
 
 class BikeChecker(object):
     """
@@ -53,7 +57,12 @@ class BikeChecker(object):
     :type url: `basestring`
 
     .. _TFL: http://www.tfl.gov.uk/
+
+    :returns: a list of dictionaries containing bike station data
     """
+
+    def _process_stations(self, stations):
+        self._stations_lst = [dict(_convert(e) for e in st) for st in stations] 
 
     def all(self, force=False):
         """
@@ -67,11 +76,13 @@ class BikeChecker(object):
         bike stations
         """
         now = _time_ms(datetime.datetime.utcnow())
-        if force or now - self.last_updated > CACHE_LIMIT:
-            self.etree = etree.parse(self.endpoint)
-        return [dict(_convert(e) for e in st) for st in self.etree.getroot()] 
+        if force or now - self._last_updated > CACHE_LIMIT:
+            self._process_stations(_parse_feed(self.endpoint))
+        return self._stations_lst
 
     def __init__(self, endpoint=None):
-        self.last_updated = 0
-        self.etree = None
+        self._last_updated = 0
+        self._etree = None
+        self._stations_lst = []
+        self._stations_map = {}
         self.endpoint = endpoint or TFL_DATA_LOC
