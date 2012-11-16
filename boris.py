@@ -54,6 +54,7 @@ class BikeChecker(object):
 
     .. _TFL: http://www.tfl.gov.uk/
     """
+
     def all(self, force=False):
         """
         Gets all available bike data.
@@ -67,12 +68,10 @@ class BikeChecker(object):
         """
         now = _time_ms(datetime.datetime.utcnow())
         if force or now - self.last_updated > CACHE_LIMIT:
-            self.etree = etree.parse(self.url)
+            self.etree = etree.parse(self.endpoint)
         return [dict(_convert(e) for e in st) for st in self.etree.getroot()] 
 
-    def __init__(self, url=None):
-        self.url = TFL_DATA_LOC
+    def __init__(self, endpoint=None):
         self.last_updated = 0
         self.etree = None
-        if url:
-            self.url = url
+        self.endpoint = endpoint or TFL_DATA_LOC
