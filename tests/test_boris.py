@@ -26,6 +26,12 @@ class TestBoris(unittest.TestCase):
         actual = [boris._convert(x) for x in inputs]
         self.assertEquals(expected, actual)
 
+    def test_haversine(self):
+        """ Tests boris._haversine """
+        a = (50.25, 20.2)
+        b = (80.0, -69.8)
+        self.assertAlmostEquals(boris._haversine(a, b), 4535.13, places=2)
+
 
 class TestBikeChecker(unittest.TestCase):
 

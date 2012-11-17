@@ -1,5 +1,6 @@
+# -- coding: utf-8 --
 import datetime
-
+from math import sin, cos, atan2, sqrt, radians
 from lxml import etree
 
 # Configuration variables
@@ -42,6 +43,42 @@ def _convert(element):
 def _parse_feed(endpoint):
     """ Parses a web-feed and returns the root XML element """
     return etree.parse(endpoint).getroot()
+
+def _haversine(first, second):
+    """
+    Calculate the `haversine`_ distance between two points on a sphere.
+
+    :param first: the first (latitude, longitude) tuple.
+
+    :param second: the second (latitude, longitude) tuple.
+    
+    Forumula is as follows:
+
+    a = sin²(Δφ/2) + cos(φ1).cos(φ2).sin²(Δλ/2)
+    c = 2.atan2(√a, √(1−a))
+    d = R.c
+
+    where:
+
+    φ1 - latitude of the first point.
+    φ2 - latitude of the second point.
+    Δφ - latitude delta.
+    Δλ - longitude delta.
+    R - is the Earth's radius in km (we will use 6371 km)
+
+    :returns: the distance in km between two points.
+
+    .. _haversine: http://en.wikipedia.org/wiki/Haversine_formula
+    """
+    lat_1 = radians(first[0])
+    lat_2 = radians(second[0])
+    d_lat = radians(second[0] - first[0])
+    d_lng = radians(second[1] - first[1])
+    R = 6371.0
+    a = pow(sin(d_lat / 2.0), 2) + cos(lat_1) * \
+        cos(lat_2) * pow(sin(d_lng / 2.0), 2)
+    c = 2.0 * atan2(sqrt(a), sqrt(1 - a))
+    return R * c
 
 
 class BikeChecker(object):
