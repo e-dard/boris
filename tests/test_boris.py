@@ -78,7 +78,7 @@ class TestBikeChecker(unittest.TestCase):
         self.assertFalse(etree_mock.called)
 
         # now we force an update
-        self.bc.all(force=True)
+        self.bc.all(skip_cache=True)
         self.assertTrue(etree_mock.called)
 
         # reset the mock and exceed the cache

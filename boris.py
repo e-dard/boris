@@ -31,7 +31,9 @@ def _time_ms(dt):
     return diff.total_seconds() * 1000
 
 def _convert(element):
-    """ Convert value associated with an element's tag to right type """
+    """ 
+    Convert value associated with an element's tag to correct data type 
+    """
     value = element.text
     if value is not None:
         value = TAG_TYPES.get(element.tag, unicode)(value)
@@ -47,14 +49,13 @@ class BikeChecker(object):
     The BikeChecker object allows you to access Barclay's Bike 
     availabily.
 
-    It maintains of the most recent availabily data, so you don't need 
+    It maintains the most recent availabily data, so you don't need 
     to worry about refreshing the data source; simply use the methods 
     provided to access bike data and the :class:`boris.BikeChecker` 
     class will take care of whether to request new bike availabily data.
 
     :param url: optional web-service url. You _may_ need to change this
-    if `TFL`_ change the endpoint in the future.
-    :type url: `basestring`
+                if `TFL`_ change the endpoint in the future.
 
     .. _TFL: http://www.tfl.gov.uk/
 
@@ -64,19 +65,19 @@ class BikeChecker(object):
     def _process_stations(self, stations):
         self._stations_lst = [dict(_convert(e) for e in st) for st in stations] 
 
-    def all(self, force=False):
+    def all(self, skip_cache=False):
         """
         Gets all available bike data.
 
-        :param force: if set to True will ignore cache and request 
-        fresh data.
-        :type force: boolean
+        :param skip_cache: optional argument specifying whether to 
+                           check the cache (default) or skip it and 
+                           explicitly request fresh data.
 
         :returns: a list of dictionaries describing current status of 
-        bike stations
+                  bike stations
         """
         now = _time_ms(datetime.datetime.utcnow())
-        if force or now - self._last_updated > CACHE_LIMIT:
+        if skip_cache or now - self._last_updated > CACHE_LIMIT:
             self._process_stations(_parse_feed(self.endpoint))
         return self._stations_lst
 
