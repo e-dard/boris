@@ -127,6 +127,8 @@ class BikeChecker(object):
         self._stations_lst = [dict(_convert(e) for e in st) for st in stations] 
         if not self._stations_lst:
             raise InvalidDataException("No Station data available")
+        for station in self._stations_lst:
+            self._stations_map[station['name']] = station
 
     def all(self, skip_cache=False):
         """

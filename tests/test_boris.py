@@ -68,16 +68,19 @@ class TestBikeChecker(unittest.TestCase):
         """
         Tests boris.BikeChecker._process_stations parses correct result
         """
-        expected = [dict([('id', 8), ('name', u"Lodge Road, St. John's Wood"), 
-                          ('terminalName', u'003423'), ('lat', 51.5), 
-                          ('long', -0.14), ('installed', True), 
-                          ('locked', False), 
-                          ('installDate', 1278241920000), 
-                          ('removalDate', None), ('temporary', False), 
-                          ('nbBikes', 3), ('nbEmptyDocks', 15), 
-                          ('nbDocks', 18)])] 
+        exp_lst = [dict([('id', 8), ('name', u"Lodge Road, St. John's Wood"), 
+                         ('terminalName', u'003423'), ('lat', 51.5), 
+                         ('long', -0.14), ('installed', True), 
+                         ('locked', False), 
+                         ('installDate', 1278241920000), 
+                         ('removalDate', None), ('temporary', False), 
+                         ('nbBikes', 3), ('nbEmptyDocks', 15), 
+                         ('nbDocks', 18)])] 
+        exp_map = {exp_lst[0]['name']: exp_lst[0]}
         self.bc._process_stations()
-        self.assertEquals(expected, self.bc._stations_lst)
+        self.assertEquals(exp_lst, self.bc._stations_lst)
+        self.assertEquals(exp_map, self.bc._stations_map)
+
 
     @patch('boris.etree.parse', wraps=etree.parse)
     @patch('boris.datetime', wraps=datetime)
