@@ -76,7 +76,7 @@ class TestBikeChecker(unittest.TestCase):
                          ('removalDate', None), ('temporary', False), 
                          ('nbBikes', 3), ('nbEmptyDocks', 15), 
                          ('nbDocks', 18)])] 
-        exp_map = {exp_lst[0]['name']: exp_lst[0]}
+        exp_map = {exp_lst[0]['name'].lower(): exp_lst[0]}
         self.bc._process_stations()
         self.assertEquals(exp_lst, self.bc._stations_lst)
         self.assertEquals(exp_map, self.bc._stations_map)
@@ -102,6 +102,13 @@ class TestBikeChecker(unittest.TestCase):
                                         utcfromtimestamp(boris.CACHE_LIMIT + 1)
         self.bc.all()
         self.assertTrue(etree_mock.called)
+
+    def test_get(self):
+        """ Tests boris.BikeChecker.get """
+        self.bc._stations_map = {'foo': 0, 'fooby': 1, 'zoo': 2}
+        self.assertEquals([0], self.bc.get("Foo "))
+        self.assertEquals([1, 0], self.bc.get("foby", fuzzy_matches=2))
+        self.assertEquals([2, 1, 0], self.bc.get("zooy", fuzzy_matches=5))
 
     def test_find_with_geo(self):
         """ Tests boris.BikeChecker.find_with_geo """

@@ -1,5 +1,6 @@
 # -- coding: utf-8 --
 import datetime
+import difflib
 from math import sin, cos, atan2, sqrt, radians
 
 from lxml import etree
@@ -128,7 +129,7 @@ class BikeChecker(object):
         if not self._stations_lst:
             raise InvalidDataException("No Station data available")
         for station in self._stations_lst:
-            self._stations_map[station['name']] = station
+            self._stations_map[station['name'].lower()] = station
 
     def all(self, skip_cache=False):
         """
@@ -145,6 +146,40 @@ class BikeChecker(object):
         if skip_cache or now - self._last_updated > CACHE_LIMIT:
             self._process_stations()
         return self._stations_lst
+
+    def get(self, name, fuzzy_matches=0):
+        """
+        Availability information for the station(s) matching `name`.
+
+        `get` allows fuzzy matching of stations based on their name, and 
+        returns up to `fuzzy_matches` stations; a station's inclusion 
+        is dependent on how close its name is to `name`, based on the 
+        result of the `Ratcliff/Obershelp`_ algorithm.
+
+        .. _Ratcliff/Obershelp: http://xlinux.nist.gov/dads/HTML/ratcliffObershelp.html
+
+        :param name: the name of the bike station
+
+        :param fuzzy_matches: optional argument specifying how many 
+                              fuzzy matches to return. By default 
+                              `fuzzy_matches` is 0 and so `get` will 
+                              return an empty list if `name` does not 
+                              exactly match a station name.
+
+        :returns: a list of station availability data ordered by how 
+                  closely the station name matches `name`.
+        """
+        name = name.strip().lower()
+        station = self._stations_map.get(name, None)
+        print "sup", station
+        if station is None:
+            names = self._stations_map.keys()
+            matches = difflib.get_close_matches(name, names, n=fuzzy_matches, 
+                                                cutoff=0)
+            if matches:
+                return [self._stations_map[x] for x in matches]
+        else:
+            return [station]
 
     def find_with_geo(self, lat, lng):
         """
