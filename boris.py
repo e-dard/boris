@@ -125,6 +125,7 @@ class BikeChecker(object):
 
     def _process_stations(self):
         stations = _parse_feed(self.endpoint)
+        self._last_updated = long(stations.get("lastUpdate"))
         self._stations_lst = [dict(_convert(e) for e in st) for st in stations] 
         if not self._stations_lst:
             raise InvalidDataException("No Station data available")
@@ -147,7 +148,7 @@ class BikeChecker(object):
             self._process_stations()
         return self._stations_lst
 
-    def get(self, name, fuzzy_matches=0):
+    def get(self, name, fuzzy_matches=0, skip_cache=False):
         """
         Availability information for the station(s) matching `name`.
 
@@ -166,12 +167,19 @@ class BikeChecker(object):
                               return an empty list if `name` does not 
                               exactly match a station name.
 
+        :param skip_cache: optional argument specifying whether to 
+                           check the cache (default) or skip it and 
+                           explicitly request fresh data.
+
         :returns: a list of station availability data ordered by how 
                   closely the station name matches `name`.
         """
+        now = _time_ms(datetime.datetime.utcnow())
+        if skip_cache or now - self._last_updated > CACHE_LIMIT:
+            self._process_stations()
+
         name = name.strip().lower()
         station = self._stations_map.get(name, None)
-        print "sup", station
         if station is None:
             names = self._stations_map.keys()
             matches = difflib.get_close_matches(name, names, n=fuzzy_matches, 
@@ -181,7 +189,7 @@ class BikeChecker(object):
         else:
             return [station]
 
-    def find_with_geo(self, lat, lng, predicate=None):
+    def find_with_geo(self, lat, lng, predicate=None, skip_cache=False):
         """
         Availability information for the nearest station to 
         (`lat`, `lng`). Using `predicate` you can ensure that any 
@@ -202,11 +210,19 @@ class BikeChecker(object):
                           which must be satisfied by any station 
                           returned.
 
+        :param skip_cache: optional argument specifying whether to 
+                           check the cache (default) or skip it and 
+                           explicitly request fresh data.
+
         :returns: a `dict` containing an availability `dict` for the 
                   nearest station, as well as the distance to that 
                   station. If no stations satisfy `predicate`, and 
                   empty `dict` is returned.
         """
+        now = _time_ms(datetime.datetime.utcnow())
+        if skip_cache or now - self._last_updated > CACHE_LIMIT:
+            self._process_stations()
+
         if predicate is None: 
             predicate = lambda x: True
         if not self._stations_lst: 
@@ -214,14 +230,14 @@ class BikeChecker(object):
 
         near, near_dist = None, None
         for station in self._stations_lst:
-            st_geo = (station['geo']['lat'], station['geo']['lng'])
+            st_geo = (station['lat'], station['long'])
             station_dist = _haversine((lat, lng), st_geo)
             if predicate(station) and \
                (not near_dist or station_dist < near_dist):
                 near, near_dist = station, station_dist
         return {'station': near, 'distance': near_dist} if near else {}
 
-    def find_with_postcode(self, postcode, predicate=None):
+    def find_with_postcode(self, postcode, predicate=None, skip_cache=False):
         """ 
         Availability information for the nearest station to `postcode`.
 
@@ -235,17 +251,25 @@ class BikeChecker(object):
                           which must be satisfied by any station 
                           returned.
 
+        :param skip_cache: optional argument specifying whether to 
+                           check the cache (default) or skip it and 
+                           explicitly request fresh data.
+
         :returns: a `dict` containing an availability `dict` for the 
                   nearest station, as well as  the distance to that 
                   station. If no stations satisfy `predicate`, and 
                   empty `dict` is returned.
         """
+        now = _time_ms(datetime.datetime.utcnow())
+        if skip_cache or now - self._last_updated > CACHE_LIMIT:
+            self._process_stations()
+
         info = self.pc.get(postcode)
         if not info:
             raise InvalidPostcodeException("No known postcode %s" % postcode)
         if 'geo' not in info or not set(['lat', 'lng']) <= set(info['geo']):
             raise InvalidDataException("Missing latitude and/or longitude")
-        lat, lng = info['geo']['lat'], info['geo']['lng']
+        lat, lng = float(info['geo']['lat']), float(info['geo']['lng'])
         return self.find_with_geo(lat, lng, predicate=predicate)
 
 class IllegalPointException(Exception): pass

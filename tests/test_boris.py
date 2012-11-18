@@ -44,7 +44,7 @@ class TestBikeChecker(unittest.TestCase):
 
     def setUp(self):
         x = """
-                <stations>
+                <stations lastUpdate="0">
                     <station>
                         <id>8</id>
                         <name>Lodge Road, St. John's Wood</name>
@@ -105,15 +105,19 @@ class TestBikeChecker(unittest.TestCase):
     def test_get(self):
         """ Tests boris.BikeChecker.get """
         self.bc._stations_map = {'foo': 0, 'fooby': 1, 'zoo': 2}
+        #harmless callable to stop the stations updating
+        self.bc._process_stations = int 
         self.assertEquals([0], self.bc.get("Foo "))
         self.assertEquals([1, 0], self.bc.get("foby", fuzzy_matches=2))
         self.assertEquals([2, 1, 0], self.bc.get("zooy", fuzzy_matches=5))
 
     def test_find_with_geo(self):
         """ Tests boris.BikeChecker.find_with_geo """
-        phillimore = {'geo': {'lat': 51.4996, 'lng': -0.1975}, 'nbBikes': 5}
-        christopher_st = {'geo': {'lat': 51.5212, 'lng': -0.08}, 'nbBikes': 3}
+        phillimore = {'lat': 51.4996, 'long': -0.1975, 'nbBikes': 5}
+        christopher_st = {'lat': 51.5212, 'long': -0.08, 'nbBikes': 3}
         self.bc._stations_lst = [phillimore, christopher_st]
+        #harmless callable to stop the stations updating
+        self.bc._process_stations = int 
 
         # Earl's Court is closer to Phillimore St.
         earls_crt = (51.4920, -0.1933)
