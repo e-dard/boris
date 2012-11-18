@@ -81,7 +81,6 @@ class TestBikeChecker(unittest.TestCase):
         self.assertEquals(exp_lst, self.bc._stations_lst)
         self.assertEquals(exp_map, self.bc._stations_map)
 
-
     @patch('boris.etree.parse', wraps=etree.parse)
     @patch('boris.datetime', wraps=datetime)
     def test_all_cache(self, dt_mock, etree_mock):
@@ -137,7 +136,6 @@ class TestBikeChecker(unittest.TestCase):
         predicate = lambda x: x['nbBikes'] >= 6
         actual = self.bc.find_with_geo(*warren, predicate=predicate)
         self.assertEquals({}, actual)
-
 
     def test_find_with_postcode_errors(self):
         """ Tests boris.BikeChecker.find_with_postcode exceptions """
