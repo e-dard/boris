@@ -181,38 +181,64 @@ class BikeChecker(object):
         else:
             return [station]
 
-    def find_with_geo(self, lat, lng):
+    def find_with_geo(self, lat, lng, predicate=None):
         """
         Availability information for the nearest station to 
-        (`lat`, `lng`).
+        (`lat`, `lng`). Using `predicate` you can ensure that any 
+        returned stations also satisfy certain properties.
+
+        For example, ensuring there are at least five bikes available:
+
+        >>> bc = BikeChecker()
+        >>> bike_predicate = lambda x: x['nbBikes'] >= 4 
+        >>> bc.find_with_geo(51.49, -0.19, predicate=bike_predicate)
+        >>> # results here.
 
         :param lat: latidude of position
 
         :param lng: longitude of position
 
+        :parma predicate: optional argument specifying a predicate 
+                          which must be satisfied by any station 
+                          returned.
+
         :returns: a `dict` containing an availability `dict` for the 
                   nearest station, as well as the distance to that 
-                  station.
+                  station. If no stations satisfy `predicate`, and 
+                  empty `dict` is returned.
         """
-        if not self._stations_lst:
+        if predicate is None: 
+            predicate = lambda x: True
+        if not self._stations_lst: 
             self._process_stations()
+
         near, near_dist = None, None
         for station in self._stations_lst:
             st_geo = (station['geo']['lat'], station['geo']['lng'])
             station_dist = _haversine((lat, lng), st_geo)
-            if not near_dist or station_dist < near_dist:
+            if predicate(station) and \
+               (not near_dist or station_dist < near_dist):
                 near, near_dist = station, station_dist
-        return {'station': near, 'distance': near_dist}
+        return {'station': near, 'distance': near_dist} if near else {}
 
-    def find_with_postcode(self, postcode):
+    def find_with_postcode(self, postcode, predicate=None):
         """ 
         Availability information for the nearest station to `postcode`.
 
+        Using `predicate` you can ensure that any returned stations 
+        also satisfy certain properties, for example that they have a 
+        certain number of bikes available.
+
         :param postcode: the postcode to search
+
+        :parma predicate: optional argument specifying a predicate 
+                          which must be satisfied by any station 
+                          returned.
 
         :returns: a `dict` containing an availability `dict` for the 
                   nearest station, as well as  the distance to that 
-                  station.
+                  station. If no stations satisfy `predicate`, and 
+                  empty `dict` is returned.
         """
         info = self.pc.get(postcode)
         if not info:
@@ -220,7 +246,7 @@ class BikeChecker(object):
         if 'geo' not in info or not set(['lat', 'lng']) <= set(info['geo']):
             raise InvalidDataException("Missing latitude and/or longitude")
         lat, lng = info['geo']['lat'], info['geo']['lng']
-        return self.find_with_geo(lat, lng)
+        return self.find_with_geo(lat, lng, predicate=predicate)
 
 class IllegalPointException(Exception): pass
 class StationDataException(Exception): pass

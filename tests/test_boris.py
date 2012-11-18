@@ -3,7 +3,7 @@ import datetime
 from StringIO import StringIO
 
 from lxml import etree
-from mock import patch, Mock
+from mock import patch, Mock, call
 
 import boris
 from boris import BikeChecker, IllegalPointException, \
@@ -112,21 +112,32 @@ class TestBikeChecker(unittest.TestCase):
 
     def test_find_with_geo(self):
         """ Tests boris.BikeChecker.find_with_geo """
-        phillimore = {'lat': 51.4996, 'lng': -0.1975}
-        christopher_st = {'lat': 51.5212, 'lng': -0.08}
-        self.bc._stations_lst = [{'geo': phillimore}, {'geo': christopher_st}]
+        phillimore = {'geo': {'lat': 51.4996, 'lng': -0.1975}, 'nbBikes': 5}
+        christopher_st = {'geo': {'lat': 51.5212, 'lng': -0.08}, 'nbBikes': 3}
+        self.bc._stations_lst = [phillimore, christopher_st]
 
+        # Earl's Court is closer to Phillimore St.
         earls_crt = (51.4920, -0.1933)
-        expected = {'geo': phillimore}
         actual = self.bc.find_with_geo(*earls_crt)
-        self.assertEquals(expected, actual['station'])
+        self.assertEquals(phillimore, actual['station'])
         self.assertLess(0.0, actual['distance'])
 
+        # Warren St is closer to Christopher St.
         warren = (51.5249, -0.1383)
-        expected = {'geo': christopher_st}
         actual = self.bc.find_with_geo(*warren)
-        self.assertEquals(expected, actual['station'])
+        self.assertEquals(christopher_st, actual['station'])
         self.assertLess(0.0, actual['distance'])
+
+        # Christopher St doesn't have enough bikes available
+        predicate = lambda x: x['nbBikes'] >= 5
+        actual = self.bc.find_with_geo(*warren, predicate=predicate)
+        self.assertEquals(phillimore, actual['station'])
+
+        # No stations satisfy this desired availability
+        predicate = lambda x: x['nbBikes'] >= 6
+        actual = self.bc.find_with_geo(*warren, predicate=predicate)
+        self.assertEquals({}, actual)
+
 
     def test_find_with_postcode_errors(self):
         """ Tests boris.BikeChecker.find_with_postcode exceptions """
@@ -147,7 +158,10 @@ class TestBikeChecker(unittest.TestCase):
         self.bc.pc.get = Mock(return_value={'geo': {'lat':1, 'lng': 2}})
         self.bc.find_with_geo = Mock()
         self.bc.find_with_postcode("abc 123")
-        self.bc.find_with_geo.assert_called_once_with(1, 2)
+        p = lambda x: True
+        self.bc.find_with_postcode("abc 123", predicate=p)
+        self.bc.find_with_geo.assert_has_calls([call(1, 2, predicate=None), 
+                                                call(1, 2, predicate=p)])
 
 
 
