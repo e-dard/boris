@@ -46,15 +46,23 @@ def _parse_feed(endpoint):
     """ Parses a web-feed and returns the root XML element """
     return etree.parse(endpoint).getroot()
 
+def _is_geo_valid(lat, lng):
+    """ Checks if geographical point valid """
+    if abs(lat) > 90 or abs(lng) > 180:
+        return False
+    return True
+
 def _haversine(first, second):
     """
     Calculate the `haversine`_ distance between two points on a sphere.
 
     .. _haversine: http://en.wikipedia.org/wiki/Haversine_formula
 
-    :param first: the first (latitude, longitude) tuple.
+    :param first: the first (latitude, longitude) tuple specified in 
+                  decimal degrees.
 
-    :param second: the second (latitude, longitude) tuple.
+    :param second: the second (latitude, longitude) tuple specified in 
+                   decimal degrees.
     
     Forumula is as follows:
 
@@ -72,6 +80,11 @@ def _haversine(first, second):
 
     :returns: the distance in km between two points.
     """
+    for point in (first, second):
+        if not _is_geo_valid(*point):
+            msg = "(%s, %s) is not a valid decimal lat/lng" % point
+            raise IllegalPointException(msg)
+
     lat_1 = radians(first[0])
     lat_2 = radians(second[0])
     d_lat = radians(second[0] - first[0])
@@ -168,13 +181,8 @@ class BikeChecker(object):
         lat, lng = info['geo']['lat'], info['geo']['lng']
         return self.find_with_geo(lat, lng)
 
-
-class StationDataException(Exception):
-    pass
-
-class InvalidDataException(Exception):
-    pass
-
-class InvalidPostcodeException(Exception):
-    pass
+class IllegalPointException(Exception): pass
+class StationDataException(Exception): pass
+class InvalidDataException(Exception): pass
+class InvalidPostcodeException(Exception): pass
         

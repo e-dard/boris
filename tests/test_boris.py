@@ -6,7 +6,7 @@ from lxml import etree
 from mock import patch, Mock
 
 import boris
-from boris import BikeChecker
+from boris import BikeChecker, IllegalPointException
 
 
 class TestBoris(unittest.TestCase):
@@ -31,6 +31,12 @@ class TestBoris(unittest.TestCase):
         a = (50.25, 20.2)
         b = (80.0, -69.8)
         self.assertAlmostEquals(boris._haversine(a, b), 4535.13, places=2)
+
+        c = (0, 200)
+        d = (-200, 0)
+        f = boris._haversine
+        self.assertRaises(IllegalPointException, f, c, a)
+        self.assertRaises(IllegalPointException, f, b, d)
 
 
 class TestBikeChecker(unittest.TestCase):
@@ -69,8 +75,7 @@ class TestBikeChecker(unittest.TestCase):
                           ('removalDate', None), ('temporary', False), 
                           ('nbBikes', 3), ('nbEmptyDocks', 15), 
                           ('nbDocks', 18)])] 
-        stations = boris._parse_feed(self.bc.endpoint)
-        self.bc._process_stations(stations)
+        self.bc._process_stations()
         self.assertEquals(expected, self.bc._stations_lst)
 
     @patch('boris.etree.parse', wraps=etree.parse)
