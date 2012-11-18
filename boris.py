@@ -153,7 +153,9 @@ class BikeChecker(object):
 
         :param lng: longitude of position
 
-        :returns: a `dict` containing availability at the nearest station
+        :returns: a `dict` containing an availability `dict` for the 
+                  nearest station, as well as the distance to that 
+                  station.
         """
         if not self._stations_lst:
             self._process_stations()
@@ -163,7 +165,7 @@ class BikeChecker(object):
             station_dist = _haversine((lat, lng), st_geo)
             if not near_dist or station_dist < near_dist:
                 near, near_dist = station, station_dist
-        return near
+        return {'station': near, 'distance': near_dist}
 
     def find_with_postcode(self, postcode):
         """ 
@@ -171,7 +173,9 @@ class BikeChecker(object):
 
         :param postcode: the postcode to search
 
-        :returns: a `dict` containing availability at the nearest station
+        :returns: a `dict` containing an availability `dict` for the 
+                  nearest station, as well as  the distance to that 
+                  station.
         """
         info = self.pc.get(postcode)
         if not info:

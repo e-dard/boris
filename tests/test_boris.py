@@ -6,7 +6,8 @@ from lxml import etree
 from mock import patch, Mock
 
 import boris
-from boris import BikeChecker, IllegalPointException
+from boris import BikeChecker, IllegalPointException, \
+                  InvalidPostcodeException, InvalidDataException
 
 
 class TestBoris(unittest.TestCase):
@@ -98,6 +99,48 @@ class TestBikeChecker(unittest.TestCase):
                                         utcfromtimestamp(boris.CACHE_LIMIT + 1)
         self.bc.all()
         self.assertTrue(etree_mock.called)
+
+    def test_find_with_geo(self):
+        """ Tests boris.BikeChecker.find_with_geo """
+        phillimore = {'lat': 51.4996, 'lng': -0.1975}
+        christopher_st = {'lat': 51.5212, 'lng': -0.08}
+        self.bc._stations_lst = [{'geo': phillimore}, {'geo': christopher_st}]
+
+        earls_crt = (51.4920, -0.1933)
+        expected = {'geo': phillimore}
+        actual = self.bc.find_with_geo(*earls_crt)
+        self.assertEquals(expected, actual['station'])
+        self.assertLess(0.0, actual['distance'])
+
+        warren = (51.5249, -0.1383)
+        expected = {'geo': christopher_st}
+        actual = self.bc.find_with_geo(*warren)
+        self.assertEquals(expected, actual['station'])
+        self.assertLess(0.0, actual['distance'])
+
+    def test_find_with_postcode_errors(self):
+        """ Tests boris.BikeChecker.find_with_postcode exceptions """
+        get_mock = Mock(return_value=None)
+        patcher = patch.object(self.bc, 'pc', 
+                               new=Mock(get=get_mock))
+        patcher.start()
+        f = self.bc.find_with_postcode
+        self.assertRaises(InvalidPostcodeException, f, None)
+        get_mock.return_value = {'foo': 'bar'}
+        self.assertRaises(InvalidDataException, f, None)
+        get_mock.return_value = {'geo': {'lat':0}}
+        self.assertRaises(InvalidDataException, f, None)
+        patcher.stop()
+
+    def test_find_with_postcode(self):
+        """ Tests boris.BikeChecker.find_with_postcode """
+        self.bc.pc.get = Mock(return_value={'geo': {'lat':1, 'lng': 2}})
+        self.bc.find_with_geo = Mock()
+        self.bc.find_with_postcode("abc 123")
+        self.bc.find_with_geo.assert_called_once_with(1, 2)
+
+
+
 
 
 if __name__ == '__main__':
