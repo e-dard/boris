@@ -64,6 +64,14 @@ class TestBikeChecker(unittest.TestCase):
             """
         self.bc = BikeChecker(endpoint=StringIO(x))
 
+    def test_last_updated(self):
+        """ Tests the boris.BikeChecker.last_updated property """
+        self.assertIsNone(self.bc.last_updated)
+        self.bc._last_updated = long(1353300000000)
+        expected = datetime.datetime(2012, 11, 19, 4, 40)
+        self.assertEquals(expected, self.bc.last_updated)
+
+
     def test__process_stations(self):
         """
         Tests boris.BikeChecker._process_stations parses correct result
