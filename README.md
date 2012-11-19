@@ -151,7 +151,96 @@ OK, but suppose we need to know the nearest bike station with at least 3 bikes c
 ```
 Both the `find_with_postcode` and `find_with_geo` accept functions as optional arguments.
 
-## Boris Client
+## The Boris Client
+
+Included in the library is a simple client, which is suitable for use on the command line, and shows off a basic implementation on top of the 
+Boris library.
+
+```
+$ python -m boris.client -h   
+usage: client.py [-h] [--fuzzy fuzzy] [--min min_bikes] string [string ...]
+
+Easily lookup current Barclays Bike availability by name, postcode or
+geographical position.
+
+positional arguments:
+  string           the search term (postcode, station name or lat,lng point
+
+optional arguments:
+  -h, --help       show this help message and exit
+  --fuzzy fuzzy    the number of fuzzy matches
+  --min min_bikes  for geo/postcode based queries, only show stations with
+                   minimum available bikes
+```
+
+### Simple Usage
+
+Search by name for bike availability:
+
+```bash
+$ python -m boris.client soho
+Availability data last updated 2 minutes ago.
+
+Moor Street, Soho
+  Bikes available: 4
+```
+
+Optionally specify the number of fuzzy matches:
+
+```bash
+$ python -m boris.client --fuzzy 4 camden town
+
+Availability data last updated 1 minutes ago.
+
+Parkway, Camden Town
+  Bikes available: 27
+
+
+Bonny Street, Camden Town
+  Bikes available: 24
+
+
+Greenland Road, Camden Town
+  Bikes available: 26
+
+
+Arlington Road, Camden Town
+  Bikes available: 1
+  ```
+
+Search based on location (postcode or latitude, longitude pair), optionally adding  the minimum number of bikes required. Distances to the 
+station are provided:
+
+```bash
+$ python -m boris.client W1F 8PZ
+
+Availability data last updated 1 minutes ago.
+
+Great Marlborough Street, Soho (distance: 70 metres)
+  Bikes available: 0
+```
+
+with minimum bike requirement:
+
+```bash
+$ python -m boris.client --min 1 W1F 8PZ
+
+Availability data last updated 1 minutes ago.
+
+Charles II Street, West End (distance: 750 metres)
+  Bikes available: 5
+  ```
+
+  and finally using coordinates (note there is *no* comma between latitude and longitude:
+
+  ```bash
+$ python -m boris.client 51.506 -0.168 
+
+Availability data last updated 35 seconds ago.
+
+Triangle Car Park, Hyde Park (distance: 160 metres)
+  Bikes available: 8
+  ```
 
 
 © 2012, [Edward Robinson](http://twitter.com/eddrobinson)
