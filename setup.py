@@ -17,14 +17,14 @@ setup(
     author_email='me@eddrobinson.net',
     description="Easily access and search Barclays bike availability in London, UK.",
     long_description=__doc__,
-    py_modules=['boris.py, client.py'],
+    py_modules=['boris', 'client'],
     zip_safe=False,
     include_package_data=True,
     platforms='any',
     install_requires=[
         'lxml>=3.0.1', 'Postcodes>=0.1'
     ],
-    tests_require=['nose', 'mock'],
+    tests_require=['mock'],
     classifiers=[
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
