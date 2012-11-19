@@ -7,8 +7,11 @@ import boris
 POSTCODE_REGEX = re.compile("[a-z]{1,2}[0-9r][0-9a-z]?[0-9][a-z]{2}")
 bc = boris.BikeChecker()
 
-def get_bikes(search):
+def get_bikes(search, fuzzy=None, min_bikes=None):
     res = None
+    predicate = None
+    if min_bikes > 1:
+        predicate = lambda x: x['nbBikes'] > min_bikes
     # decipher input.
     try:
         nums = [float(x) for x in search]
@@ -16,15 +19,16 @@ def get_bikes(search):
         # try for postcode
         as_postcode = ''.join(search).lower()
         if POSTCODE_REGEX.match(as_postcode):
-            res = bc.find_with_postcode(as_postcode)
+            res = bc.find_with_postcode(as_postcode, predicate=predicate)
         else:
             # search by name
-            res = bc.get(' '.join(search), fuzzy_matches=1)
+            fuzzy = fuzzy or 1
+            res = bc.get(' '.join(search), fuzzy_matches=fuzzy)
     else: 
         # lat / lng match
         if len(nums) == 2:
             try:
-                res = bc.find_with_geo(nums[0], nums[1])
+                res = bc.find_with_geo(nums[0], nums[1], predicate=predicate)
             except boris.IllegalPointException:
                 print "Sorry, (%s, %s) doesn't seem like a valid point" % nums
         else:
@@ -76,8 +80,6 @@ def display_bikes(results, updated):
     return result
 
 
-
-
 if __name__ == '__main__':
     msg = 'Easily lookup current Barclays Bike availability by name, '\
           'postcode or geographical position.'
@@ -85,10 +87,14 @@ if __name__ == '__main__':
     parser.add_argument('search', metavar='string', type=unicode, nargs='+',
                help='the search term (postcode, station name or lat,lng point')
 
-    parser.add_argument('--fuzzy', metavar='fuzzy matches', type=int,
+    parser.add_argument('--fuzzy', metavar='fuzzy', type=int,
                help='the number of fuzzy matches')
 
+    parser.add_argument('--min', metavar='min_bikes', type=int,
+               help='for geo/postcode based queries, only show stations with '\
+                    'minimum available bikes')
+
     args = parser.parse_args()
-    bikes = get_bikes(args.search)
+    bikes = get_bikes(args.search, fuzzy=args.fuzzy, min_bikes=args.min)
     print display_bikes(bikes, bc.last_updated)
 
