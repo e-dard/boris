@@ -4,13 +4,13 @@ You'll find more detailed documentation [over here](http://boris.readthedocs.org
 
 Boris is a Python client library for the Barclays Bike availability web-service provided by Transport For London.
 
-Using Boris you can get real-time availability of barclays bikes at all station across London. Unlike some other thin-wrappers over the 
+Using Boris you can get (almost) real-time availability of barclays bikes at all station across London. Unlike some other thin-wrappers over the 
 tfl data, Boris also allows you to:
 
  - do a fuzzy search on bike station name;
- - search for the nearest bike station to any UK  postcode (via the postcodes library);
+ - search for the nearest bike station to any UK  postcode (via the [postcodes](https://github.com/e-dard/postcodes) library);
  - search for the nearest bike station to any geographical point;
- - apply arbitrary filter functions to two previous abilities (so you can, for example, get the nearest bike station with 3 bikes available); and
+ - apply arbitrary predicates to the two previous abilities (so you can, for example, get the nearest bike station with 3 bikes available); and
  - provides a caching layer over the tfl web-service.
 
  Nearest stations are calculated using the [Haversine](http://en.wikipedia.org/wiki/Haversine_formula) formula (which calculates the 
@@ -19,8 +19,11 @@ tfl data, Boris also allows you to:
  in terms of walking.
 
 #### NOTE
-In order to use the Boris library, the machine the Python process is running on must have had its IP address registered to use the 
-Barclays Cycle Hire availability feed with the TFL in its [Developer Area](http://www.tfl.gov.uk/businessandpartners/syndication/16492.aspx).
+---
+In order to use the Boris library, the machine that the Python process is running on, must have had its IP address registered with the TFL 
+in its [Developer Area](http://www.tfl.gov.uk/businessandpartners/syndication/16492.aspx). The IP must have requested access to the 
+Barclays Cycle Hire availability feed. This process is pretty simple and you will usually just be emailed confirmation you have access.
+---
 
 ## Installation
 
@@ -88,12 +91,13 @@ optional number of close stations to return if there is no exact match:
  >>>
  ```
 
- ### Nearest Bike Stations
+
+### Nearest Bike Stations
 
 Using either the `find_with_postcode`, or the `find_with_geo` methods you can get the station information associated with station nearest. 
 Not only that, but you can specify that the nearest station must satisfy arbitrary *predicates*.
 
-For example, let's get the current station information near us:
+For example, let's get the current station information for the bike station nearest `EC2A 1AD`:
 
 ```python
 >>> ...
@@ -116,8 +120,8 @@ For example, let's get the current station information near us:
 >>> 
 ```
 
-When either `find_with_postcode`, or the `find_with_geo` are called, the station dictionary is wrapped in a further dictionary that also 
-provides distance information, using the `distance` key. **All distances are represented in kilometres**.
+When either `find_with_postcode` or the `find_with_geo` are called, the station dictionary is wrapped in a further dictionary that also 
+provides distance information (accessed using the `distance` key). **All distances are represented in kilometres**.
 
 OK, but suppose we need to know the nearest bike station with at least 3 bikes currently available. No problem:
 
@@ -141,7 +145,7 @@ OK, but suppose we need to know the nearest bike station with at least 3 bikes c
              'temporary': True,
              'terminalName': u'001211'}}
 >>>
-
+```
 Both the `find_with_postcode` and `find_with_geo` accept functions as optional arguments.
 
 ## Boris Client
