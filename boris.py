@@ -186,6 +186,8 @@ class BikeChecker(object):
         name = name.strip().lower()
         station = self._stations_map.get(name, None)
         if station is None:
+            if not fuzzy_matches:
+                return []
             names = self._stations_map.keys()
             matches = difflib.get_close_matches(name, names, n=fuzzy_matches, 
                                                 cutoff=0)
@@ -221,8 +223,8 @@ class BikeChecker(object):
 
         :returns: a `dict` containing an availability `dict` for the 
                   nearest station, as well as the distance to that 
-                  station. If no stations satisfy `predicate`, and 
-                  empty `dict` is returned.
+                  station in kilometres. If no stations satisfy 
+                  `predicate`, and empty `dict` is returned.
         """
         now = _time_ms(datetime.datetime.utcnow())
         if skip_cache or now - self._last_updated > CACHE_LIMIT:
@@ -262,8 +264,8 @@ class BikeChecker(object):
 
         :returns: a `dict` containing an availability `dict` for the 
                   nearest station, as well as  the distance to that 
-                  station. If no stations satisfy `predicate`, and 
-                  empty `dict` is returned.
+                  station in kilometres. If no stations satisfy 
+                  `predicate`, and empty `dict` is returned.
         """
         now = _time_ms(datetime.datetime.utcnow())
         if skip_cache or now - self._last_updated > CACHE_LIMIT:
