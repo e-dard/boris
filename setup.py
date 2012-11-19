@@ -22,7 +22,7 @@ setup(
     include_package_data=True,
     platforms='any',
     install_requires=[
-        'lxml>=3.0.1'
+        'lxml>=3.0.1', 'Postcodes>=0.1'
     ],
     tests_require=['nose', 'mock'],
     classifiers=[

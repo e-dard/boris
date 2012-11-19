@@ -1,1 +1,2 @@
-lxml==3.0.1
+lxml>=3.0.1
+Postcodes>=0.1
