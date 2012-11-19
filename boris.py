@@ -132,6 +132,11 @@ class BikeChecker(object):
         for station in self._stations_lst:
             self._stations_map[station['name'].lower()] = station
 
+    @property
+    def last_updated(self):
+        if self._last_updated:
+            return datetime.datetime.fromtimestamp(self._last_updated / 1000)
+
     def all(self, skip_cache=False):
         """
         Gets all available bike data.
