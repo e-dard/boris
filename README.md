@@ -19,10 +19,13 @@ tfl data, Boris also allows you to:
  in terms of walking.
 
 #### NOTE
+
 ---
+
 In order to use the Boris library, the machine that the Python process is running on, must have had its IP address registered with the TFL 
 in its [Developer Area](http://www.tfl.gov.uk/businessandpartners/syndication/16492.aspx). The IP must have requested access to the 
 Barclays Cycle Hire availability feed. This process is pretty simple and you will usually just be emailed confirmation you have access.
+
 ---
 
 ## Installation
