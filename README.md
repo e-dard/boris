@@ -2,16 +2,15 @@
 
 You'll find more detailed documentation [over here](http://boris.readthedocs.org/en/latest/).
 
-Boris is a Python client library for the Barclays Bike availability web-service provided by Transport For London.
+Boris is a Python library that leverages the [Barclays Bike](http://www.tfl.gov.uk/roadusers/cycling/14808.aspx) availability [web-service](http://www.tfl.gov.uk/businessandpartners/syndication/16493.aspx), provided by Transport For London.
 
-Using Boris you can get (almost) real-time availability of barclays bikes at all station across London. Unlike some other thin-wrappers over the 
-tfl data, Boris also allows you to:
+Using Boris you can get (almost) real-time bike availability at all Barclays Bike stations across London, as well as associated data. Unlike some other thin-wrappers over the TFL data, Boris also allows you to:
 
  - do a fuzzy search on bike station name;
  - search for the nearest bike station to any UK  postcode (via the [postcodes](https://github.com/e-dard/postcodes) library);
  - search for the nearest bike station to any geographical point;
  - apply arbitrary predicates to the two previous abilities (so you can, for example, get the nearest bike station with 3 bikes available); and
- - provides a caching layer over the tfl web-service.
+ - provides a caching layer over the TFL web-service.
 
  Nearest stations are calculated using the [Haversine](http://en.wikipedia.org/wiki/Haversine_formula) formula (which calculates the 
  shortest distance between two points on a sphere). Therefore, the distances calculated are probably shorter than the actual walking 
@@ -164,7 +163,7 @@ Easily lookup current Barclays Bike availability by name, postcode or
 geographical position.
 
 positional arguments:
-  string           the search term (postcode, station name or lat,lng point
+  string           the search term (postcode, station name or lat, lng point)
 
 optional arguments:
   -h, --help       show this help message and exit
