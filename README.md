@@ -1,7 +1,5 @@
 # Boris
 
-You'll find more detailed documentation [over here](http://boris.readthedocs.org/en/latest/).
-
 Boris is a Python library that leverages the [Barclays Bike](http://www.tfl.gov.uk/roadusers/cycling/14808.aspx) availability [web-service](http://www.tfl.gov.uk/businessandpartners/syndication/16493.aspx), provided by Transport For London.
 
 Using Boris you can get (almost) real-time bike availability at all Barclays Bike stations across London, as well as associated data. Unlike some other thin-wrappers over the TFL data, Boris also allows you to:
