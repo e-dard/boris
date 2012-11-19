@@ -10,7 +10,7 @@ bc = boris.BikeChecker()
 def get_bikes(search, fuzzy=None, min_bikes=None):
     res = None
     predicate = None
-    if min_bikes > 1:
+    if min_bikes >= 1:
         predicate = lambda x: x['nbBikes'] > min_bikes
     # decipher input.
     try:
