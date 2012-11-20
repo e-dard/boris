@@ -19,9 +19,11 @@ Using Boris you can get (almost) real-time bike availability at all Barclays Bik
 
 ---
 
-In order to use the Boris library, the machine that the Python process is running on, must have had its IP address registered with the TFL 
-in its [Developer Area](http://www.tfl.gov.uk/businessandpartners/syndication/16492.aspx). The IP must have requested access to the 
-Barclays Cycle Hire availability feed. This process is pretty simple and you will usually just be emailed confirmation you have access.
+The Boris library utilises the official TFL Bike availability syndication feed, and from my *limited* testing I've found that the web-service 
+is publicly accessible, however, this may not always be the case. So, it might be an idea to register the IP address associated with the 
+machine running this library, in the TFL's [Developer Area](http://www.tfl.gov.uk/businessandpartners/syndication/16492.aspx). The specific 
+feed used by Boris is the Barclays Cycle Hire availability feed. This process is pretty simple and you will usually just be emailed confirmation 
+you have access.
 
 ---
 
